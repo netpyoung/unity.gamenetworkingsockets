@@ -13,7 +13,7 @@
     <WarningsAsErrors />
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
      <Content Include="$(ProjectDir)\..\..\lib\win_64\GameNetworkingSockets.dll">
          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
      </Content>
@@ -21,6 +21,18 @@
          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
      </Content>
      <Content Include="$(ProjectDir)\..\..\lib\win_64\libprotobuf.dll">
+         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+     </Content>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
+     <Content Include="$(ProjectDir)\..\..\lib\mac_64\libGameNetworkingSockets.dylib">
+         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+     </Content>
+     <Content Include="$(ProjectDir)\..\..\lib\mac_64\libcrypto.1.1.dylib">
+         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+     </Content>
+     <Content Include="$(ProjectDir)\..\..\lib\mac_64\libprotobuf.18.dylib">
          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
      </Content>
   </ItemGroup>

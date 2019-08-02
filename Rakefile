@@ -78,3 +78,45 @@ task :lib_win_64 do
     sh "cp #{protobuf_release_dir}\\bin\\libprotobuf.dll #{dst_libprotobuf}"
   end
 end
+
+
+desc 'lib macOs 64'
+task :lib_mac_64 do
+  # $ otool -L libGameNetworkingSockets.dylib
+  # libGameNetworkingSockets.dylib:
+  #	@rpath/libGameNetworkingSockets.dylib (compatibility version 0.0.0, current version 0.0.0)
+  #	/usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib (compatibility version 1.1.0, current version 1.1.0)
+  #	/usr/local/opt/protobuf/lib/libprotobuf.18.dylib (compatibility version 19.0.0, current version 19.1.0)
+  #	/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 400.9.4)
+  #	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
+
+  build_dir = 'build/mac_64'
+  lib_dir = 'lib/mac_64'
+  FileUtils.mkdir_p(build_dir) unless File.directory?(build_dir)
+  FileUtils.mkdir_p(lib_dir) unless File.directory?(lib_dir)
+  # dst_static_libgamenetworkingsockets = File.join(`pwd`.strip, lib_dir, 'libGameNetworkingSockets.a')
+  dst_dynamic_libgamenetworkingsockets = File.join(`pwd`.strip, lib_dir, 'libGameNetworkingSockets.dylib')
+  dst_libcrypto = File.join(`pwd`.strip, lib_dir, 'libcrypto.1.1.dylib')
+  dst_libprotobuf = File.join(`pwd`.strip, lib_dir, 'libprotobuf.18.dylib')
+
+  Dir.chdir(build_dir) do
+    sh 'brew install openssl@1.1'
+    sh 'brew install protobuf'
+    sh 'brew install ninja'
+    sh 'brew install meson'
+    ENV['PKG_CONFIG_PATH'] = "/usr/local/opt/openssl@1.1/lib/pkgconfig:#{ENV['PKG_CONFIG_PATH']}"
+
+    sh 'git clone https://github.com/ValveSoftware/GameNetworkingSockets.git'
+    Dir.chdir('GameNetworkingSockets') do
+      sh 'meson . build'
+      sh 'ninja -C build'
+    end
+
+    # cp 'GameNetworkingSockets/build/src/libGameNetworkingSockets.a', dst_static_libgamenetworkingsockets
+    cp 'GameNetworkingSockets/build/src/libGameNetworkingSockets.dylib', dst_dynamic_libgamenetworkingsockets
+    cp '/usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib', dst_libcrypto
+    cp '/usr/local/opt/protobuf/lib/libprotobuf.18.dylib', dst_libprotobuf
+
+    puts `otool -L GameNetworkingSockets/build/src/libGameNetworkingSockets.dylib`
+  end
+end

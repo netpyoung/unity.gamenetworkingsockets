@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -14,11 +15,9 @@ public class Main : MonoBehaviour
     StatusCallback status;
     uint connection;
 
-    async void  Start()
+    void  Start()
     {
         Library.Initialize();
-
-        await Task.Delay(1000);
 
         ushort port = 8080;
         this.client = new NetworkingSockets();
@@ -49,6 +48,14 @@ public class Main : MonoBehaviour
                     break;
             }
         };
+        
+        DebugCallback debug = (type, message) => {
+            Debug.Log("Debug - Type: " + type + ", Message: " + message);
+        };
+
+        NetworkingUtils utils = new NetworkingUtils();
+
+        utils.SetDebugCallback(DebugType.Everything, debug);
     }
     const int maxMessages = 20;
 
@@ -74,6 +81,15 @@ public class Main : MonoBehaviour
 
                 netMessage.Destroy();
             }
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (Input.GetKeyUp(KeyCode.Q))
+        {
+            byte[] data = new byte[64];
+            client.SendMessageToConnection(connection, data);    
         }
     }
 
